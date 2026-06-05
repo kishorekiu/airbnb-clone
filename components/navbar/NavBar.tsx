@@ -1,18 +1,30 @@
-import React from "react";
-import Logo from "./Logo";
-import SearchBar from "./SearchBar";
+import Link from "next/link";
 import UserMenu from "./UserMenu";
+import { Mountain } from "lucide-react"; // Temporary logo icon
+import Search from "./Search";
 
-const NavBar = () => {
+export default function Navbar() {
   return (
-    <header className="sticky top-0 z-10 w-full bg-white border-b border-neutral-200">
-      <div className="max-w-630 mx-auto xl:p-14 md:px-10 sm:px-2 px-4 h-14 flex items-center justify-between gap-3 md:gap-0">
-        <Logo />
-        <SearchBar />
-        <UserMenu />
+    <header className="fixed w-full bg-white z-50 transition-all duration-300 border-b border-neutral-200">
+      <div className="py-4">
+        <div className="max-w-630 mx-auto xl:px-20 md:px-10 sm:px-2 px-4">
+          <div className="flex flex-row items-center justify-between gap-3 md:gap-0">
+            {/* Logo Section */}
+            <Link href="/" className="flex items-center gap-2 cursor-pointer">
+              <Mountain className="hidden md:block text-rose-500" size={32} />
+              <span className="hidden md:block font-bold text-rose-500 text-xl tracking-tight">
+                airbnb
+              </span>
+            </Link>
+
+            {/* The Complex Search State Machine */}
+            <Search />
+
+            {/* User Navigation */}
+            <UserMenu />
+          </div>
+        </div>
       </div>
     </header>
   );
-};
-
-export default NavBar;
+}

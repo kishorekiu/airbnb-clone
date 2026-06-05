@@ -1,0 +1,131 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Search as SearchIcon } from "lucide-react";
+
+export default function Search() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"stays" | "experiences">("stays");
+  const [activeInput, setActiveInput] = useState<
+    "where" | "when" | "who" | null
+  >(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Close the expanded menu if the user clicks outside of it
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setIsExpanded(false);
+        setActiveInput(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const openSearch = (input: "where" | "when" | "who") => {
+    setIsExpanded(true);
+    setActiveInput(input);
+  };
+
+  // --- COMPONENT: Collapsed Pill ---
+  if (!isExpanded) {
+    return (
+      <div
+        onClick={() => openSearch("where")}
+        className="border border-neutral-200 w-full md:w-auto py-2 rounded-full shadow-sm hover:shadow-md transition cursor-pointer"
+      >
+        <div className="flex flex-row items-center justify-between">
+          <div className="text-sm font-medium px-6">Anywhere</div>
+          <div className="hidden sm:block text-sm font-medium px-6 border-x border-neutral-200 flex-1 text-center">
+            Any week
+          </div>
+          <div className="text-sm pl-6 pr-2 text-neutral-500 flex flex-row items-center gap-3">
+            <div className="hidden sm:block">Add guests</div>
+            <div className="p-2 bg-rose-500 rounded-full text-white">
+              <SearchIcon size={16} strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- COMPONENT: Expanded Search Deck ---
+  return (
+    <div
+      ref={searchRef}
+      className="absolute top-0 left-0 w-full bg-white pb-6 shadow-sm z-50 animate-in fade-in slide-in-from-top-4 duration-200"
+    >
+      <div className="max-w-212.5 mx-auto flex flex-col items-center pt-4">
+        {/* Top Tabs: Stays vs Experiences */}
+        <div className="flex items-center gap-8 mb-6">
+          <button
+            onClick={() => setActiveTab("stays")}
+            className={`text-base pb-2 ${activeTab === "stays" ? "text-black font-medium border-b-2 border-black" : "text-neutral-500 hover:text-neutral-800 hover:border-b-2 hover:border-neutral-300"}`}
+          >
+            Stays
+          </button>
+          <button
+            onClick={() => setActiveTab("experiences")}
+            className={`text-base pb-2 ${activeTab === "experiences" ? "text-black font-medium border-b-2 border-black" : "text-neutral-500 hover:text-neutral-800 hover:border-b-2 hover:border-neutral-300"}`}
+          >
+            Experiences
+          </button>
+        </div>
+
+        {/* The Segmented Input Bar */}
+        <div className="bg-neutral-100 rounded-full flex flex-row items-center border border-neutral-200 w-full relative">
+          {/* Where Input */}
+          <div
+            onClick={() => setActiveInput("where")}
+            className={`flex-1 rounded-full py-3 px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
+          >
+            <div className="text-xs font-bold text-neutral-800">Where</div>
+            <input
+              type="text"
+              placeholder="Search destinations"
+              className="bg-transparent text-sm w-full outline-none placeholder-neutral-500 truncate"
+            />
+          </div>
+
+          <div className="h-8 w-px bg-neutral-300"></div>
+
+          {/* When Input (Simplified for layout) */}
+          <div
+            onClick={() => setActiveInput("when")}
+            className={`flex-1 rounded-full py-3 px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
+          >
+            <div className="text-xs font-bold text-neutral-800">When</div>
+            <div className="text-sm text-neutral-500">Add dates</div>
+          </div>
+
+          <div className="h-8 w-px bg-neutral-300"></div>
+
+          {/* Who Input & Search Button */}
+          <div
+            onClick={() => setActiveInput("who")}
+            className={`flex-1 flex flex-row items-center justify-between rounded-full py-2 pl-8 pr-2 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "who" ? "bg-white shadow-md hover:bg-white" : ""}`}
+          >
+            <div>
+              <div className="text-xs font-bold text-neutral-800">Who</div>
+              <div className="text-sm text-neutral-500">Add guests</div>
+            </div>
+
+            {/* Big Search Button */}
+            <button className="bg-rose-500 hover:bg-rose-600 transition text-white rounded-full px-6 py-3 flex items-center gap-2">
+              <SearchIcon size={18} strokeWidth={3} />
+              <span className="font-medium">Search</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Dropdowns would conditionally render here based on activeInput */}
+        {/* Example: {activeInput === "who" && <GuestCounterModal />} */}
+      </div>
+    </div>
+  );
+}

@@ -18,7 +18,7 @@ export default function LoginPage() {
             {isSignUp ? "Already have an account? " : "New to our platform? "}
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="font-medium text-rose-600 hover:text-rose-500 underline underline-offset-4"
+              className="font-medium text-rose-600 hover:text-rose-500 underline underline-offset-4 cursor-pointer"
             >
               {isSignUp ? "Sign In" : "Create an account"}
             </button>
@@ -67,14 +67,14 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors"
+            className="w-full flex justify-center cursor-pointer py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors"
           >
             {isSignUp ? "Sign Up" : "Sign In with Email"}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="mt-6 position-relative">
+        <div className="mt-6 relative">
           <div
             className="absolute inset-0 flex items-center"
             aria-hidden="true"
@@ -94,7 +94,7 @@ export default function LoginPage() {
           <form action={handleGoogleSignIn}>
             <button
               type="submit"
-              className="w-full inline-flex justify-center py-2.5 px-4 border border-neutral-300 rounded-lg bg-white text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors"
+              className="w-full inline-flex justify-center cursor-pointer py-2.5 px-4 border border-neutral-300 rounded-lg bg-white text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors"
             >
               <svg
                 className="h-5 w-5 mr-2"
@@ -130,7 +130,7 @@ export default function LoginPage() {
           <form action={handleGitHubSignIn}>
             <button
               type="submit"
-              className="w-full inline-flex justify-center py-2.5 px-4 border border-neutral-300 rounded-lg bg-white text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors"
+              className="w-full inline-flex justify-center py-2.5 cursor-pointer px-4 border border-neutral-300 rounded-lg bg-white text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors"
             >
               <svg
                 className="h-5 w-5 mr-2"
