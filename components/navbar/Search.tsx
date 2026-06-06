@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search as SearchIcon } from "lucide-react";
+import GuestCounter from "./GuestCounter";
 
 export default function Search() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -78,11 +79,11 @@ export default function Search() {
         </div>
 
         {/* The Segmented Input Bar */}
-        <div className="bg-neutral-100 rounded-full flex flex-row items-center border border-neutral-200 w-full relative">
+        <div className="bg-neutral-100 rounded-3xl md:rounded-full flex flex-col md:flex-row items-center border border-neutral-200 w-full relative">
           {/* Where Input */}
           <div
             onClick={() => setActiveInput("where")}
-            className={`flex-1 rounded-full py-3 px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
+            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">Where</div>
             <input
@@ -92,39 +93,39 @@ export default function Search() {
             />
           </div>
 
-          <div className="h-8 w-px bg-neutral-300"></div>
+          {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
+          <div className="w-[90%] md:w-[1px] h-[1px] md:h-8 bg-neutral-300"></div>
 
-          {/* When Input (Simplified for layout) */}
+          {/* When Input */}
           <div
             onClick={() => setActiveInput("when")}
-            className={`flex-1 rounded-full py-3 px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
+            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">When</div>
             <div className="text-sm text-neutral-500">Add dates</div>
           </div>
 
-          <div className="h-8 w-px bg-neutral-300"></div>
+          {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
+          <div className="w-[90%] md:w-[1px] h-[1px] md:h-8 bg-neutral-300"></div>
 
           {/* Who Input & Search Button */}
           <div
             onClick={() => setActiveInput("who")}
-            className={`flex-1 flex flex-row items-center justify-between rounded-full py-2 pl-8 pr-2 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "who" ? "bg-white shadow-md hover:bg-white" : ""}`}
+            className={`w-full md:flex-1 flex flex-row items-center justify-between rounded-full py-2 pl-6 pr-2 md:pl-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "who" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div>
               <div className="text-xs font-bold text-neutral-800">Who</div>
               <div className="text-sm text-neutral-500">Add guests</div>
             </div>
 
-            {/* Big Search Button */}
-            <button className="bg-rose-500 hover:bg-rose-600 transition text-white rounded-full px-6 py-3 flex items-center gap-2">
+            <button className="bg-rose-500 hover:bg-rose-600 transition text-white rounded-full p-3 md:px-6 md:py-3 flex items-center justify-center gap-2">
               <SearchIcon size={18} strokeWidth={3} />
-              <span className="font-medium">Search</span>
+              <span className="hidden md:block font-medium">Search</span>
             </button>
+
+            {activeInput === "who" && <GuestCounter />}
           </div>
         </div>
-
-        {/* Modal Dropdowns would conditionally render here based on activeInput */}
-        {/* Example: {activeInput === "who" && <GuestCounterModal />} */}
       </div>
     </div>
   );

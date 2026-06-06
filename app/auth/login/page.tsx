@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-start justify-center bg-neutral-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-neutral-200">
         {/* Header */}
         <div className="text-center">
