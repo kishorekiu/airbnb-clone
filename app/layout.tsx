@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/navbar/BottomNav";
 import Navbar from "@/components/navbar/NavBar";
+import ToasterProvider from "@/components/ToasterProvider";
+import { auth } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,20 +21,22 @@ export const metadata: Metadata = {
   description: "Airbnb",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ToasterProvider />
         <Navbar />
         <main className="pt-24 md:pt-20">{children}</main>
-        <BottomNav />
+        <BottomNav currentUser={session?.user} />
       </body>
     </html>
   );

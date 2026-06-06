@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import GuestCounter from "./GuestCounter";
+import DatePicker from "./DatePicker";
+import { format } from "date-fns";
+import LocationPicker, { CountrySelectValue } from "./LocationPicker";
 
 export default function Search() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -10,6 +13,19 @@ export default function Search() {
   const [activeInput, setActiveInput] = useState<
     "where" | "when" | "who" | null
   >(null);
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: "selection",
+  });
+  const checkInStr = format(dateRange.startDate, "MMM dd");
+  const checkOutStr = format(dateRange.endDate, "MMM dd");
+  const displayDates =
+    dateRange.startDate !== dateRange.endDate
+      ? `${checkInStr} - ${checkOutStr}`
+      : "Add dates";
+
+  const [location, setLocation] = useState<CountrySelectValue | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Close the expanded menu if the user clicks outside of it
@@ -83,30 +99,54 @@ export default function Search() {
           {/* Where Input */}
           <div
             onClick={() => setActiveInput("where")}
-            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
+            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition relative ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">Where</div>
-            <input
-              type="text"
-              placeholder="Search destinations"
-              className="bg-transparent text-sm w-full outline-none placeholder-neutral-500 truncate"
-            />
+            <div
+              className={`text-sm truncate ${location ? "text-black font-medium" : "text-neutral-500"}`}
+            >
+              {location ? location.label : "Search destinations"}
+            </div>
+
+            {/* WHERE - MODAL */}
+            {activeInput === "where" && (
+              <div className="absolute left-0 top-full mt-4 z-50 bg-white rounded-3xl shadow-xl border border-neutral-200 p-4">
+                <LocationPicker
+                  value={location!}
+                  onChange={(val) => setLocation(val)}
+                />
+              </div>
+            )}
           </div>
 
           {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
-          <div className="w-[90%] md:w-[1px] h-[1px] md:h-8 bg-neutral-300"></div>
+          <div className="w-[90%] md:w-px h-px md:h-8 bg-neutral-300"></div>
 
           {/* When Input */}
           <div
             onClick={() => setActiveInput("when")}
-            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
+            className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition relative ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">When</div>
-            <div className="text-sm text-neutral-500">Add dates</div>
+            <div
+              className={`text-sm ${displayDates === "Add dates" ? "text-neutral-500" : "text-black font-medium"}`}
+            >
+              {displayDates}
+            </div>
+
+            {/* WHEN - MODAL */}
+            {activeInput === "when" && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 shadow-xl border border-neutral-200 rounded-3xl z-50 bg-white p-4">
+                <DatePicker
+                  value={dateRange}
+                  onChange={(item) => setDateRange(item.selection as any)}
+                />
+              </div>
+            )}
           </div>
 
           {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
-          <div className="w-[90%] md:w-[1px] h-[1px] md:h-8 bg-neutral-300"></div>
+          <div className="w-[90%] md:w-px h-px md:h-8 bg-neutral-300"></div>
 
           {/* Who Input & Search Button */}
           <div
@@ -123,7 +163,12 @@ export default function Search() {
               <span className="hidden md:block font-medium">Search</span>
             </button>
 
-            {activeInput === "who" && <GuestCounter />}
+            {/* WHO - MODAL */}
+            {activeInput === "who" && (
+              <div className="absolute right-0 top-full mt-4 w-[90vw] sm:w-100 max-w-[calc(100vw-2rem)] bg-white rounded-3xl shadow-xl border border-neutral-200 p-4 sm:p-8 z-50">
+                <GuestCounter />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -3,8 +3,10 @@ import Search from "./Search";
 import MobileSearch from "./MobileSearch"; // Import the new mobile trigger
 import UserMenu from "./UserMenu";
 import { Mountain } from "lucide-react";
+import { auth } from "@/lib/auth";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await auth();
   return (
     <header className="fixed w-full bg-white z-40 transition-all duration-300 border-b border-neutral-200">
       <div className="py-4">
@@ -30,7 +32,7 @@ export default function Navbar() {
 
             {/* User Navigation: Hidden on mobile, handled by BottomNav */}
             <div className="hidden md:block">
-              <UserMenu />
+              <UserMenu currentUser={session?.user} />
             </div>
           </div>
         </div>

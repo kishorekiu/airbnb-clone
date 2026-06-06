@@ -49,7 +49,7 @@ const CounterRow = ({
 export default function GuestCounter() {
   // In Phase 2, we will lift this state up to the URL Search Params
   return (
-    <div className="absolute right-0 top-full mt-4 w-[90vw] sm:w-100 max-w-[calc(100vw-2rem)] bg-white rounded-3xl shadow-xl border border-neutral-200 p-4 sm:p-8 z-50">
+    <div className="w-full">
       <CounterRow
         title="Adults"
         subtitle="Ages 13 or above"

@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import { Search, Heart, UserCircle2 } from "lucide-react";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
 
-export default function BottomNav() {
+interface BottomNavProps {
+  currentUser?: any;
+}
+
+export default function BottomNav({ currentUser }: BottomNavProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -45,13 +50,32 @@ export default function BottomNav() {
           <Heart size={24} />
           <span className="text-[10px] font-medium">Wishlists</span>
         </Link>
-        <Link
-          href="/auth/login"
-          className="flex flex-col items-center gap-1 text-neutral-500 hover:text-neutral-800"
-        >
-          <UserCircle2 size={24} />
-          <span className="text-[10px] font-medium">Log in</span>
-        </Link>
+        {/* Dynamic Auth State */}
+        {currentUser ? (
+          <Link
+            href="/trips"
+            className="flex flex-col items-center gap-1 text-neutral-500 hover:text-neutral-800 transition"
+          >
+            {currentUser.image ? (
+              <img
+                src={currentUser.image}
+                alt="Profile"
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            ) : (
+              <UserCircle2 size={24} />
+            )}
+            <span className="text-[10px] font-medium">Profile</span>
+          </Link>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="flex flex-col items-center gap-1 text-neutral-500 hover:text-neutral-800 transition"
+          >
+            <UserCircle2 size={24} />
+            <span className="text-[10px] font-medium">Log in</span>
+          </Link>
+        )}
       </div>
     </div>
   );

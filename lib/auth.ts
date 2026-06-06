@@ -1,25 +1,43 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
-import CredentialsProvider from "next-auth/providers/credentials";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import dbConnect from "./dbConnect";
+import User from "@/models/User";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
-    ...authConfig.providers, // ⚠️ CRITICAL: You missed this line! This brings in Google/GitHub
-    CredentialsProvider({
+    ...authConfig.providers,
+    Credentials({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: "email", type: "text" },
+        password: { label: "password", type: "password" },
       },
       async authorize(credentials) {
-        if (
-          credentials?.email === "kishore@mail.com" &&
-          credentials?.password === "kishore"
-        ) {
-          return { id: "1", name: "kishore", email: "kishore@mail.com" };
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Invalid credentials");
         }
-        return null;
+
+        await dbConnect();
+
+        const user = await User.findOne({ email: credentials.email });
+
+        if (!user || !user?.hashedPassword) {
+          throw new Error("User not registered");
+        }
+
+        const isCorrectPassword = await bcrypt.compare(
+          credentials.password as string,
+          user.hashedPassword,
+        );
+
+        if (!isCorrectPassword) {
+          throw new Error("Incorrect password");
+        }
+
+        return user;
       },
     }),
   ],
