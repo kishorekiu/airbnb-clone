@@ -3,7 +3,7 @@ import mongoose, { Schema, models } from "mongoose";
 const ListingSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  imageSrc: { type: String, required: true },
+  imageSrc: [{ type: String, required: true }],
   createdAt: { type: Date, default: Date.now },
   category: { type: String, required: true },
   roomCount: { type: Number, required: true },
