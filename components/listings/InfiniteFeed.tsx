@@ -18,28 +18,46 @@ export default function InfiniteFeed({
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [hasMore, setHasMore] = useState(initialCursor !== null);
 
-  // The ref that triggers the intersection observer
-  const { ref, inView } = useInView({
-    threshold: 0,
-    rootMargin: "400px", // Trigger fetch 400px before reaching the exact bottom
-  });
+  // 1. THE LOCK: Track if a network request is currently active
+  const [isFetching, setIsFetching] = useState(false);
+
+  const { ref, inView } = useInView({ rootMargin: "400px" });
 
   useEffect(() => {
-    if (inView && hasMore && cursor) {
+    // 2. CHECK THE LOCK: Only load more if we are NOT currently fetching
+    if (inView && hasMore && cursor && !isFetching) {
       loadMoreListings();
     }
-  }, [inView, hasMore, cursor]);
+  }, [inView, hasMore, cursor, isFetching]);
 
   const loadMoreListings = async () => {
-    // Pass the current cursor to the API
-    const result = await getListings(cursor, 12);
+    setIsFetching(true); // Engage the lock
 
-    if (result.listings.length > 0) {
-      setListings((prev) => [...prev, ...result.listings]);
-      setCursor(result.nextCursor); // Update state with the next cursor
-      setHasMore(result.nextCursor !== null); // If null, we hit the end
-    } else {
-      setHasMore(false);
+    try {
+      const result = await getListings(cursor, 12);
+
+      if (result.listings.length > 0) {
+        setListings((prev) => {
+          // 3. THE SAFETY NET: Filter out duplicates before adding them to state
+          const newUniqueListings = result.listings.filter(
+            (newListing: any) =>
+              !prev.some(
+                (existingListing: any) =>
+                  existingListing._id === newListing._id,
+              ),
+          );
+          return [...prev, ...newUniqueListings];
+        });
+
+        setCursor(result.nextCursor);
+        setHasMore(result.nextCursor !== null);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Error loading more listings:", error);
+    } finally {
+      setIsFetching(false); // Release the lock no matter what happens
     }
   };
 
@@ -51,7 +69,6 @@ export default function InfiniteFeed({
         ))}
       </div>
 
-      {/* The invisible trigger element */}
       {hasMore && (
         <div ref={ref} className="flex justify-center items-center py-12 mt-8">
           <div className="w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
