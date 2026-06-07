@@ -1,25 +1,30 @@
 "use server";
 
-import dbConnect from "@/lib/dbConnect";
-import Listing from "@/models/Listing";
+const LISTING_SERVICE_URL = process.env.LISTING_SERVICE_URL;
 
 export async function getListings(page = 1, limit = 12) {
+  if (!LISTING_SERVICE_URL) {
+    console.error(
+      "LISTING_SERVICE_URL is not defined in environment variables.",
+    );
+    return [];
+  }
+
   try {
-    await dbConnect();
+    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?page=${page}&limit=${limit}`;
 
-    const skip = (page - 1) * limit;
+    const response = await fetch(apiUrl, { method: "GET" });
 
-    // .lean() strips the heavy Mongoose methods, leaving pure JSON
-    const listings = await Listing.find({})
-      .sort({ createdAt: -1 }) // Newest first
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch listings: ${response.status} ${response.statusText}`,
+      );
+    }
 
-    // Deep serialize the ObjectIds to standard strings
-    return JSON.parse(JSON.stringify(listings));
+    const result = await response.json();
+    return result.data;
   } catch (error: any) {
-    console.error("Failed to fetch listings:", error);
+    console.error("Failed to fetch listings from microservice:", error);
     return [];
   }
 }

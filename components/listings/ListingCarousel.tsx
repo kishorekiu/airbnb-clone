@@ -25,7 +25,7 @@ export default function ListingCarousel({
     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
 
   // Minimum distance (in pixels) required to trigger a swipe
-  const minSwipeDistance = 50;
+  const minSwipeDistance = 30;
 
   const handlePrev = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation(); // Prevents the click from routing to the details page
@@ -118,7 +118,7 @@ export default function ListingCarousel({
           <div className="hidden md:flex absolute inset-y-0 left-0 items-center pl-2 z-20 opacity-0 group-hover:opacity-100 transition">
             <button
               onClick={handlePrev}
-              className="bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white hover:scale-105 transition"
+              className="bg-white/90 p-1.5 rounded-full cursor-pointer shadow-sm hover:bg-white hover:scale-105 transition"
             >
               <ChevronLeft size={18} className="text-neutral-800" />
             </button>
@@ -126,7 +126,7 @@ export default function ListingCarousel({
           <div className="hidden md:flex absolute inset-y-0 right-0 items-center pr-2 z-20 opacity-0 group-hover:opacity-100 transition">
             <button
               onClick={handleNext}
-              className="bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white hover:scale-105 transition"
+              className="bg-white/90 p-1.5 rounded-full cursor-pointer shadow-sm hover:bg-white hover:scale-105 transition"
             >
               <ChevronRight size={18} className="text-neutral-800" />
             </button>
@@ -143,6 +143,7 @@ export default function ListingCarousel({
               className={`h-1.5 rounded-full transition-all ${
                 index === currentIndex ? "w-1.5 bg-white" : "w-1.5 bg-white/60"
               }`}
+              onClick={() => setCurrentIndex(index)}
             />
           ))}
         </div>
