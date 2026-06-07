@@ -2,29 +2,26 @@
 
 const LISTING_SERVICE_URL = process.env.LISTING_SERVICE_URL;
 
-export async function getListings(page = 1, limit = 12) {
-  if (!LISTING_SERVICE_URL) {
-    console.error(
-      "LISTING_SERVICE_URL is not defined in environment variables.",
-    );
-    return [];
-  }
+export async function getListings(cursor: string | null = null, limit = 12) {
+  if (!LISTING_SERVICE_URL) return { listings: [], nextCursor: null };
 
   try {
-    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?page=${page}&limit=${limit}`;
+    // If a cursor exists, append it to the URL query string
+    const cursorParam = cursor ? `&cursor=${cursor}` : "";
+    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?limit=${limit}${cursorParam}`;
 
     const response = await fetch(apiUrl, { method: "GET" });
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch listings: ${response.status} ${response.statusText}`,
-      );
-    }
+    if (!response.ok) throw new Error("Network response was not ok");
 
     const result = await response.json();
-    return result.data;
+
+    return {
+      listings: result.data || [],
+      nextCursor: result.nextCursor || null,
+    };
   } catch (error: any) {
-    console.error("Failed to fetch listings from microservice:", error);
-    return [];
+    console.error("Failed to fetch cursor listings:", error);
+    return { listings: [], nextCursor: null };
   }
 }

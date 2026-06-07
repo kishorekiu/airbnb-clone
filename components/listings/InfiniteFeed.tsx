@@ -7,12 +7,16 @@ import { getListings } from "@/app/actions/getListings";
 
 interface InfiniteFeedProps {
   initialListings: any[];
+  initialCursor: string | null;
 }
 
-export default function InfiniteFeed({ initialListings }: InfiniteFeedProps) {
+export default function InfiniteFeed({
+  initialListings,
+  initialCursor,
+}: InfiniteFeedProps) {
   const [listings, setListings] = useState(initialListings);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [hasMore, setHasMore] = useState(initialCursor !== null);
 
   // The ref that triggers the intersection observer
   const { ref, inView } = useInView({
@@ -21,20 +25,20 @@ export default function InfiniteFeed({ initialListings }: InfiniteFeedProps) {
   });
 
   useEffect(() => {
-    if (inView && hasMore) {
+    if (inView && hasMore && cursor) {
       loadMoreListings();
     }
-  }, [inView, hasMore]);
+  }, [inView, hasMore, cursor]);
 
   const loadMoreListings = async () => {
-    const nextPage = page + 1;
-    const newProducts = await getListings(nextPage, 12);
+    // Pass the current cursor to the API
+    const result = await getListings(cursor, 12);
 
-    if (newProducts?.length) {
-      setPage(nextPage);
-      setListings((prev) => [...prev, ...newProducts]);
+    if (result.listings.length > 0) {
+      setListings((prev) => [...prev, ...result.listings]);
+      setCursor(result.nextCursor); // Update state with the next cursor
+      setHasMore(result.nextCursor !== null); // If null, we hit the end
     } else {
-      // Database has no more properties left
       setHasMore(false);
     }
   };
