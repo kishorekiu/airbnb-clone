@@ -84,6 +84,7 @@ export default function ListingCarousel({
         >
           <Image
             fill
+            unoptimized
             className="object-cover w-full h-full"
             src={img}
             alt={`${title} - Image ${index + 1}`}

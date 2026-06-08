@@ -23,8 +23,10 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   const session = await auth();
   return (
@@ -36,6 +38,7 @@ export default async function RootLayout({
         <ToasterProvider />
         <Navbar />
         <main className="pt-24 md:pt-20">{children}</main>
+        {modal}
         <BottomNav currentUser={session?.user} />
       </body>
     </html>

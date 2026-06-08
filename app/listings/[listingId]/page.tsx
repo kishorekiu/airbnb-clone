@@ -62,6 +62,7 @@ export default async function ListingPage({ params }: { params: IParams }) {
         <div className="col-span-2 row-span-2 relative">
           <Image
             fill
+            unoptimized
             className="object-cover w-full h-full hover:opacity-90 transition cursor-pointer"
             src={listing.imageSrc[0]}
             alt="Main property view"
@@ -75,6 +76,7 @@ export default async function ListingPage({ params }: { params: IParams }) {
           <div key={index} className="col-span-1 row-span-1 relative">
             <Image
               fill
+              unoptimized
               className="object-cover w-full h-full hover:opacity-90 transition cursor-pointer"
               src={image}
               alt={`Property view ${index + 2}`}
