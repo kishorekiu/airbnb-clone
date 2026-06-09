@@ -14,6 +14,7 @@ export default function ListingCarousel({
   title,
 }: ListingCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   // Touch state for mobile swiping
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -28,16 +29,19 @@ export default function ListingCarousel({
   const minSwipeDistance = 30;
 
   const handlePrev = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
     e.stopPropagation(); // Prevents the click from routing to the details page
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const handleNext = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const toggleFavorite = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     console.log("Favorited!");
   };
@@ -67,37 +71,46 @@ export default function ListingCarousel({
     }
   };
 
+  const handleInteraction = () => {
+    if (!hasInteracted) setHasInteracted(true);
+  };
+
   return (
     <div
       className="aspect-square w-full relative overflow-hidden rounded-xl group"
-      onTouchStart={onTouchStart}
+      // Unlock the rest of the images on hover or touch
+      onMouseEnter={handleInteraction}
+      onTouchStart={(e) => {
+        handleInteraction();
+        onTouchStart(e); // keep your existing touch logic
+      }}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
       {/* The Images */}
-      {images.map((img, index) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-300 ${
-            index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-          }`}
-        >
-          <Image
-            fill
-            unoptimized
-            className="object-cover w-full h-full"
-            src={img}
-            alt={`${title} - Image ${index + 1}`}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            priority={index === 0}
-            onError={() => {
-              const newSources = [...imgSources];
-              newSources[index] = fallbackImage;
-              setImgSources(newSources);
-            }}
-          />
-        </div>
-      ))}
+      {images.map((img, index) => {
+        // ULTIMATE OPTIMIZATION: If it's not the first image, and they haven't hovered, do not render it!
+        if (index !== 0 && !hasInteracted) return null;
+
+        return (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-300 ${
+              index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <Image
+              fill
+              className="object-cover w-full h-full"
+              src={img}
+              alt={`${title} - Image ${index + 1}`}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              // Priority is ONLY needed for the very first image on the screen
+              priority={index === 0}
+            />
+          </div>
+        );
+      })}
 
       {/* Favorite Button */}
       <div className="absolute top-3 right-3 z-20">

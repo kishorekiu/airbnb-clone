@@ -20,17 +20,27 @@ interface IListing {
 }
 
 export async function generateStaticParams() {
-  // Fetch the first 100 properties to pre-render at build time
-  const response = await fetch(
-    `${process.env.LISTING_SERVICE_URL}/api/v1/listings?limit=100`,
-  );
-  const result = await response.json();
+  // If we are running locally, skip this entirely to save the server
+  if (process.env.NODE_ENV === "development") {
+    return [];
+  }
 
-  if (!result || !result.data) return [];
+  // In production (Vercel), fetch the 100 listings to pre-build the HTML
+  try {
+    const res = await fetch(
+      `${process.env.LISTING_SERVICE_URL}/api/v1/listings?limit=100`,
+    );
+    const data = await res.json();
 
-  return result.data.map((listing: any) => ({
-    listingId: listing._id.toString(),
-  }));
+    if (!data || !data.data) return [];
+
+    return data.data.map((listing: any) => ({
+      listingId: listing._id.toString(),
+    }));
+  } catch (error) {
+    console.error("Failed to generate static params:", error);
+    return [];
+  }
 }
 
 export default async function ListingPage({ params }: { params: IParams }) {

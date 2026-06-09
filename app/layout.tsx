@@ -5,6 +5,7 @@ import BottomNav from "@/components/navbar/BottomNav";
 import Navbar from "@/components/navbar/NavBar";
 import ToasterProvider from "@/components/ToasterProvider";
 import { auth } from "@/lib/auth";
+import Providers from "./Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,6 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
   modal: React.ReactNode;
@@ -35,11 +35,12 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ToasterProvider />
-        <Navbar />
-        <main className="pt-24 md:pt-20">{children}</main>
-        {modal}
-        <BottomNav currentUser={session?.user} />
+        <Providers>
+          <ToasterProvider />
+          <Navbar />
+          <main className="pt-24 md:pt-20">{children}</main>
+          <BottomNav currentUser={session?.user} />
+        </Providers>
       </body>
     </html>
   );

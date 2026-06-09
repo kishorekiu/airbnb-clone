@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import ListingCard from "./ListingCard";
 import { getListings } from "@/app/actions/getListings";
 
@@ -14,68 +15,50 @@ export default function InfiniteFeed({
   initialListings,
   initialCursor,
 }: InfiniteFeedProps) {
-  const [listings, setListings] = useState(initialListings);
-  const [cursor, setCursor] = useState<string | null>(initialCursor);
-  const [hasMore, setHasMore] = useState(initialCursor !== null);
+  const { ref, inView } = useInView({ rootMargin: "50px", threshold: 0 });
 
-  // 1. THE LOCK: Track if a network request is currently active
-  const [isFetching, setIsFetching] = useState(false);
+  // React Query takes over the global cache and pagination logic
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["listings", "feed"], // This array is the "Cache Key". We will add filters here later!
+      queryFn: async ({ pageParam }) => {
+        const result = await getListings(pageParam, 12);
+        return result;
+      },
+      initialPageParam: initialCursor,
+      getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
+      // We seed the cache with the server-rendered initial data so the first load is instant
+      initialData: {
+        pages: [{ listings: initialListings, nextCursor: initialCursor }],
+        pageParams: [null],
+      },
+    });
 
-  const { ref, inView } = useInView({ rootMargin: "400px" });
-
+  // Automatically fetch the next page when the loader enters the viewport
   useEffect(() => {
-    // 2. CHECK THE LOCK: Only load more if we are NOT currently fetching
-    if (inView && hasMore && cursor && !isFetching) {
-      loadMoreListings();
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [inView, hasMore, cursor, isFetching]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const loadMoreListings = async () => {
-    setIsFetching(true); // Engage the lock
-
-    try {
-      const result = await getListings(cursor, 12);
-
-      if (result.listings.length > 0) {
-        setListings((prev) => {
-          // 3. THE SAFETY NET: Filter out duplicates before adding them to state
-          const newUniqueListings = result.listings.filter(
-            (newListing: any) =>
-              !prev.some(
-                (existingListing: any) =>
-                  existingListing._id === newListing._id,
-              ),
-          );
-          return [...prev, ...newUniqueListings];
-        });
-
-        setCursor(result.nextCursor);
-        setHasMore(result.nextCursor !== null);
-      } else {
-        setHasMore(false);
-      }
-    } catch (error) {
-      console.error("Error loading more listings:", error);
-    } finally {
-      setIsFetching(false); // Release the lock no matter what happens
-    }
-  };
+  // Flatten the array of pages into a single array of listings
+  const allListings = data?.pages.flatMap((page) => page.listings) || [];
 
   return (
     <>
-      <div className="pt-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
-        {listings.map((listing: any) => (
+      <div className="pt-24 min-h-screen grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
+        {allListings.map((listing: any) => (
           <ListingCard key={listing._id} data={listing} />
         ))}
       </div>
 
-      {hasMore && (
+      {hasNextPage && (
         <div ref={ref} className="flex justify-center items-center py-12 mt-8">
           <div className="w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 
-      {!hasMore && (
+      {!hasNextPage && (
         <div className="text-center py-12 text-neutral-500 font-medium mt-8">
           You've reached the end of the feed.
         </div>
