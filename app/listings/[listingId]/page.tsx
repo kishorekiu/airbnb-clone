@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getListingById } from "@/app/actions/getListingById";
 import { notFound } from "next/navigation";
 import { Heart } from "lucide-react";
+import BackButton from "@/components/BackButton";
 
 interface IParams {
   listingId?: string;
@@ -54,6 +55,7 @@ export default async function ListingPage({ params }: { params: IParams }) {
 
   return (
     <div className="max-w-280 mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-28 pb-20">
+      <BackButton />
       {/* 1. Header Section */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">{listing.title}</h1>
