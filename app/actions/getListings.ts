@@ -2,13 +2,18 @@
 
 const LISTING_SERVICE_URL = process.env.LISTING_SERVICE_URL;
 
-export async function getListings(cursor: string | null = null, limit = 12) {
+export async function getListings(
+  cursor: string | null = null,
+  limit = 12,
+  category: string,
+) {
   if (!LISTING_SERVICE_URL) return { listings: [], nextCursor: null };
 
   try {
     // If a cursor exists, append it to the URL query string
     const cursorParam = cursor ? `&cursor=${cursor}` : "";
-    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?limit=${limit}${cursorParam}`;
+    const categoryParam = category ? `&category=${category}` : "";
+    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?limit=${limit}${cursorParam}${categoryParam}`;
 
     const response = await fetch(apiUrl, { method: "GET" });
 

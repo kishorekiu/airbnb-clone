@@ -54,7 +54,7 @@ export default async function ListingPage({ params }: { params: IParams }) {
   if (!listing) return notFound(); // Triggers the Next.js 404 page
 
   return (
-    <div className="max-w-280 mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-28 pb-20">
+    <div className="max-w-280 mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-10 pb-20">
       <BackButton />
       {/* 1. Header Section */}
       <div className="flex flex-col gap-2">

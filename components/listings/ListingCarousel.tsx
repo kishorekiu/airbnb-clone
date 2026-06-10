@@ -157,7 +157,10 @@ export default function ListingCarousel({
               className={`h-1.5 rounded-full transition-all ${
                 index === currentIndex ? "w-1.5 bg-white" : "w-1.5 bg-white/60"
               }`}
-              onClick={() => setCurrentIndex(index)}
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentIndex(index);
+              }}
             />
           ))}
         </div>

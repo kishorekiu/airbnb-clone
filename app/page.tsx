@@ -4,7 +4,7 @@ import InfiniteFeed from "@/components/listings/InfiniteFeed";
 // Make the Home page an async Server Component
 export default async function Home() {
   // 1. Fetch the first 12 listings directly on the server
-  const initialData = await getListings(null, 12);
+  const initialData = await getListings(null, 12, "");
 
   // If the database is entirely empty
   if (initialData.listings.length === 0) {

@@ -4,6 +4,7 @@ import MobileSearch from "./MobileSearch"; // Import the new mobile trigger
 import UserMenu from "./UserMenu";
 import { Mountain } from "lucide-react";
 import { auth } from "@/lib/auth";
+import Categories from "../listings/Cayegories";
 
 export default async function Navbar() {
   const session = await auth();
@@ -35,6 +36,8 @@ export default async function Navbar() {
               <UserMenu currentUser={session?.user} />
             </div>
           </div>
+
+          <Categories />
         </div>
       </div>
     </header>

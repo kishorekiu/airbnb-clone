@@ -5,6 +5,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import ListingCard from "./ListingCard";
 import { getListings } from "@/app/actions/getListings";
+import { useSearchParams } from "next/navigation";
+import ListingCardSkeleton from "./ListingCardSkeleton";
 
 interface InfiniteFeedProps {
   initialListings: any[];
@@ -16,22 +18,27 @@ export default function InfiniteFeed({
   initialCursor,
 }: InfiniteFeedProps) {
   const { ref, inView } = useInView({ rootMargin: "50px", threshold: 0 });
+  const params = useSearchParams();
+  let category = params?.get("category");
 
   // React Query takes over the global cache and pagination logic
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["listings", "feed"], // This array is the "Cache Key". We will add filters here later!
+      queryKey: ["listings", "feed", category],
       queryFn: async ({ pageParam }) => {
-        const result = await getListings(pageParam, 12);
+        if (category === null) category = "";
+        const result = await getListings(pageParam, 12, category);
         return result;
       },
       initialPageParam: initialCursor,
       getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
       // We seed the cache with the server-rendered initial data so the first load is instant
-      initialData: {
-        pages: [{ listings: initialListings, nextCursor: initialCursor }],
-        pageParams: [null],
-      },
+      initialData: !category
+        ? {
+            pages: [{ listings: initialListings, nextCursor: initialCursor }],
+            pageParams: [null],
+          }
+        : undefined,
     });
 
   // Automatically fetch the next page when the loader enters the viewport
@@ -40,6 +47,17 @@ export default function InfiniteFeed({
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  if (isLoading) {
+    return (
+      <div className="pt-30 min-h-screen grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
+        {/* Create an array of 12 empty items and map them to skeletons */}
+        {[...Array(12)].map((_, i) => (
+          <ListingCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
 
   // Flatten the array of pages into a single array of listings
   const allListings = data?.pages.flatMap((page) => page.listings) || [];
@@ -58,9 +76,9 @@ export default function InfiniteFeed({
         </div>
       )}
 
-      {!hasNextPage && (
+      {!hasNextPage && allListings.length === 0 && (
         <div className="text-center py-12 text-neutral-500 font-medium mt-8">
-          You've reached the end of the feed.
+          No listings found for this category.
         </div>
       )}
     </>
