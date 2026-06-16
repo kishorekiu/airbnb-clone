@@ -18,22 +18,44 @@ export default function InfiniteFeed({
   initialCursor,
 }: InfiniteFeedProps) {
   const { ref, inView } = useInView({ rootMargin: "50px", threshold: 0 });
-  const params = useSearchParams();
-  let category = params?.get("category");
+  const searchParams = useSearchParams();
+  let category = searchParams?.get("category");
+  const locationValue = searchParams?.get("locationValue");
+  const guestCount = searchParams?.get("guestCount");
+  const startDate = searchParams?.get("startDate");
+  const endDate = searchParams?.get("endDate");
+
+  const isSearch = category || locationValue || guestCount || startDate;
 
   // React Query takes over the global cache and pagination logic
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["listings", "feed", category],
+      queryKey: [
+        "listings",
+        "feed",
+        category,
+        locationValue,
+        guestCount,
+        startDate,
+        endDate,
+      ],
       queryFn: async ({ pageParam }) => {
         if (category === null) category = "";
-        const result = await getListings(pageParam, 12, category);
+        const result = await getListings(
+          pageParam,
+          12,
+          category,
+          locationValue,
+          guestCount,
+          startDate,
+          endDate,
+        );
         return result;
       },
       initialPageParam: initialCursor,
       getNextPageParam: (lastPage) => lastPage?.nextCursor || undefined,
       // We seed the cache with the server-rendered initial data so the first load is instant
-      initialData: !category
+      initialData: !isSearch
         ? {
             pages: [{ listings: initialListings, nextCursor: initialCursor }],
             pageParams: [null],

@@ -4,29 +4,26 @@ import { useState, useRef, useEffect } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import GuestCounter from "./GuestCounter";
 import DatePicker from "./DatePicker";
-import { format } from "date-fns";
-import LocationPicker, { CountrySelectValue } from "./LocationPicker";
+import LocationPicker from "./LocationPicker";
+import { useSearchForm } from "@/hooks/useSearchForm";
 
 export default function Search() {
+  // 1. UI State (Visual only)
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"stays" | "experiences">("stays");
   const [activeInput, setActiveInput] = useState<
     "where" | "when" | "who" | null
   >(null);
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
-    key: "selection",
-  });
-  const checkInStr = format(dateRange.startDate, "MMM dd");
-  const checkOutStr = format(dateRange.endDate, "MMM dd");
-  const displayDates =
-    dateRange.startDate !== dateRange.endDate
-      ? `${checkInStr} - ${checkOutStr}`
-      : "Add dates";
-
-  const [location, setLocation] = useState<CountrySelectValue | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Function to close the visual UI when the hook triggers a search
+  const closeExpandedUI = () => {
+    setIsExpanded(false);
+    setActiveInput(null);
+  };
+
+  // 2. Form Logic (The Brain)
+  const form = useSearchForm(closeExpandedUI);
 
   // Close the expanded menu if the user clicks outside of it
   useEffect(() => {
@@ -35,8 +32,7 @@ export default function Search() {
         searchRef.current &&
         !searchRef.current.contains(event.target as Node)
       ) {
-        setIsExpanded(false);
-        setActiveInput(null);
+        closeExpandedUI();
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -96,77 +92,91 @@ export default function Search() {
 
         {/* The Segmented Input Bar */}
         <div className="bg-neutral-100 rounded-3xl md:rounded-full flex flex-col md:flex-row items-center border border-neutral-200 w-full relative">
-          {/* Where Input */}
+          {/* WHERE Input */}
           <div
             onClick={() => setActiveInput("where")}
             className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition relative ${activeInput === "where" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">Where</div>
             <div
-              className={`text-sm truncate ${location ? "text-black font-medium" : "text-neutral-500"}`}
+              className={`text-sm truncate ${form.location ? "text-black font-medium" : "text-neutral-500"}`}
             >
-              {location ? location.label : "Search destinations"}
+              {form.location ? form.location.label : "Search destinations"}
             </div>
-
-            {/* WHERE - MODAL */}
             {activeInput === "where" && (
               <div className="absolute left-0 top-full mt-4 z-50 bg-white rounded-3xl shadow-xl border border-neutral-200 p-4">
                 <LocationPicker
-                  value={location!}
-                  onChange={(val) => setLocation(val)}
+                  value={form.location!}
+                  onChange={form.setLocation}
                 />
               </div>
             )}
           </div>
 
-          {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
           <div className="w-[90%] md:w-px h-px md:h-8 bg-neutral-300"></div>
 
-          {/* When Input */}
+          {/* WHEN Input */}
           <div
             onClick={() => setActiveInput("when")}
             className={`w-full md:flex-1 rounded-full py-3 px-6 md:px-8 cursor-pointer hover:bg-neutral-200 transition relative ${activeInput === "when" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div className="text-xs font-bold text-neutral-800">When</div>
             <div
-              className={`text-sm ${displayDates === "Add dates" ? "text-neutral-500" : "text-black font-medium"}`}
+              className={`text-sm ${form.displayDates === "Any week" ? "text-neutral-500" : "text-black font-medium"}`}
             >
-              {displayDates}
+              {form.displayDates}
             </div>
-
-            {/* WHEN - MODAL */}
             {activeInput === "when" && (
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 shadow-xl border border-neutral-200 rounded-3xl z-50 bg-white p-4">
                 <DatePicker
-                  value={dateRange}
-                  onChange={(item) => setDateRange(item.selection as any)}
+                  value={form.dateRange}
+                  onChange={(item) => form.setDateRange(item.selection as any)}
                 />
               </div>
             )}
           </div>
 
-          {/* Mobile Horizontal Divider / Desktop Vertical Divider */}
           <div className="w-[90%] md:w-px h-px md:h-8 bg-neutral-300"></div>
 
-          {/* Who Input & Search Button */}
+          {/* WHO Input & Search Button */}
           <div
             onClick={() => setActiveInput("who")}
             className={`w-full md:flex-1 flex flex-row items-center justify-between rounded-full py-2 pl-6 pr-2 md:pl-8 cursor-pointer hover:bg-neutral-200 transition ${activeInput === "who" ? "bg-white shadow-md hover:bg-white" : ""}`}
           >
             <div>
               <div className="text-xs font-bold text-neutral-800">Who</div>
-              <div className="text-sm text-neutral-500">Add guests</div>
+              <div
+                className={`text-sm ${form.totalGuests > 1 || form.infants > 0 || form.pets > 0 ? "text-black font-medium" : "text-neutral-500"}`}
+              >
+                {form.totalGuests === 1 && form.infants === 0 && form.pets === 0
+                  ? "Add guests"
+                  : form.guestDisplayStr}
+              </div>
             </div>
 
-            <button className="bg-rose-500 hover:bg-rose-600 transition text-white rounded-full p-3 md:px-6 md:py-3 flex items-center justify-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevents reopening the "who" modal
+                form.onSubmit();
+              }}
+              className="bg-rose-500 hover:bg-rose-600 transition text-white rounded-full p-3 md:px-6 md:py-3 flex items-center justify-center gap-2"
+            >
               <SearchIcon size={18} strokeWidth={3} />
               <span className="hidden md:block font-medium">Search</span>
             </button>
 
-            {/* WHO - MODAL */}
             {activeInput === "who" && (
               <div className="absolute right-0 top-full mt-4 w-[90vw] sm:w-100 max-w-[calc(100vw-2rem)] bg-white rounded-3xl shadow-xl border border-neutral-200 p-4 sm:p-8 z-50">
-                <GuestCounter />
+                <GuestCounter
+                  adults={form.adults}
+                  setAdults={form.setAdults}
+                  childrenCount={form.childrenCount}
+                  setChildrenCount={form.setChildrenCount}
+                  infants={form.infants}
+                  setInfants={form.setInfants}
+                  pets={form.pets}
+                  setPets={form.setPets}
+                />
               </div>
             )}
           </div>

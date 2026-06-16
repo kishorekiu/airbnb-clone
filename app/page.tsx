@@ -1,10 +1,29 @@
 import { getListings } from "@/app/actions/getListings";
 import InfiniteFeed from "@/components/listings/InfiniteFeed";
 
+interface HomeProps {
+  searchParams: Promise<{
+    category?: string;
+    locationValue?: string;
+    guestCount?: string;
+    startDate?: string;
+    endDate?: string;
+  }>;
+}
+
 // Make the Home page an async Server Component
-export default async function Home() {
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
   // 1. Fetch the first 12 listings directly on the server
-  const initialData = await getListings(null, 12, "");
+  const initialData = await getListings(
+    null,
+    12,
+    params.category || "",
+    params.locationValue || null,
+    params.guestCount || null,
+    params.startDate || null,
+    params.endDate || null,
+  );
 
   // If the database is entirely empty
   if (initialData.listings.length === 0) {

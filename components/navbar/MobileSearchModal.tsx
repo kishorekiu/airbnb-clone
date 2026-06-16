@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { X, Search } from "lucide-react";
-import { format } from "date-fns";
-import LocationPicker, { CountrySelectValue } from "./LocationPicker";
+import LocationPicker from "./LocationPicker";
 import DatePicker from "./DatePicker";
 import GuestCounter from "./GuestCounter";
+import { useSearchForm } from "@/hooks/useSearchForm";
 
 interface MobileSearchModalProps {
   isOpen: boolean;
@@ -16,27 +16,15 @@ export default function MobileSearchModal({
   isOpen,
   onClose,
 }: MobileSearchModalProps) {
+  // 1. UI State (Visual only)
   const [activeStep, setActiveStep] = useState<"where" | "when" | "who">(
     "where",
   );
 
-  // Shared State
-  const [location, setLocation] = useState<CountrySelectValue | null>(null);
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
-    key: "selection",
-  });
+  // 2. Form Logic (The Brain)
+  const form = useSearchForm(onClose);
 
   if (!isOpen) return null;
-
-  // Format dates for the accordion header
-  const checkInStr = format(dateRange.startDate, "MMM dd");
-  const checkOutStr = format(dateRange.endDate, "MMM dd");
-  const displayDates =
-    dateRange.startDate !== dateRange.endDate
-      ? `${checkInStr} - ${checkOutStr}`
-      : "Any week";
 
   return (
     <div className="fixed inset-0 z-50 bg-neutral-100 flex flex-col animate-in slide-in-from-bottom-full duration-300 md:hidden">
@@ -57,11 +45,10 @@ export default function MobileSearchModal({
           {activeStep === "where" ? (
             <div className="flex flex-col gap-4 animate-in fade-in">
               <h2 className="text-2xl font-bold">Where to?</h2>
-              {/* Reused Component */}
               <LocationPicker
-                value={location || undefined}
+                value={form.location || undefined}
                 onChange={(val) => {
-                  setLocation(val);
+                  form.setLocation(val);
                   setActiveStep("when"); // Auto-advance to next step!
                 }}
               />
@@ -73,7 +60,7 @@ export default function MobileSearchModal({
             >
               <span>Where</span>
               <span className="text-neutral-800">
-                {location ? location.label : "I'm flexible"}
+                {form.location ? form.location.label : "I'm flexible"}
               </span>
             </div>
           )}
@@ -84,10 +71,9 @@ export default function MobileSearchModal({
           {activeStep === "when" ? (
             <div className="flex flex-col gap-4 animate-in fade-in">
               <h2 className="text-2xl font-bold">When's your trip?</h2>
-              {/* Reused Component */}
               <DatePicker
-                value={dateRange}
-                onChange={(item) => setDateRange(item.selection as any)}
+                value={form.dateRange}
+                onChange={(item) => form.setDateRange(item.selection as any)}
               />
               <button
                 onClick={() => setActiveStep("who")}
@@ -102,7 +88,7 @@ export default function MobileSearchModal({
               className="flex justify-between items-center text-sm font-medium text-neutral-500 cursor-pointer"
             >
               <span>When</span>
-              <span className="text-neutral-800">{displayDates}</span>
+              <span className="text-neutral-800">{form.displayDates}</span>
             </div>
           )}
         </div>
@@ -112,8 +98,16 @@ export default function MobileSearchModal({
           {activeStep === "who" ? (
             <div className="flex flex-col gap-4 animate-in fade-in">
               <h2 className="text-2xl font-bold">Who's coming?</h2>
-              {/* Reused Component */}
-              <GuestCounter />
+              <GuestCounter
+                adults={form.adults}
+                setAdults={form.setAdults}
+                childrenCount={form.childrenCount}
+                setChildrenCount={form.setChildrenCount}
+                infants={form.infants}
+                setInfants={form.setInfants}
+                pets={form.pets}
+                setPets={form.setPets}
+              />
             </div>
           ) : (
             <div
@@ -121,7 +115,11 @@ export default function MobileSearchModal({
               className="flex justify-between items-center text-sm font-medium text-neutral-500 cursor-pointer"
             >
               <span>Who</span>
-              <span className="text-neutral-800">Add guests</span>
+              <span className="text-neutral-800">
+                {form.totalGuests === 1 && form.infants === 0 && form.pets === 0
+                  ? "Add guests"
+                  : form.guestDisplayStr}
+              </span>
             </div>
           )}
         </div>
@@ -131,19 +129,17 @@ export default function MobileSearchModal({
       <div className="fixed bottom-0 w-full bg-white border-t border-neutral-200 px-6 py-4 flex justify-between items-center z-20">
         <button
           onClick={() => {
-            setLocation(null);
-            setDateRange({
-              startDate: new Date(),
-              endDate: new Date(),
-              key: "selection",
-            });
-            setActiveStep("where");
+            form.clearAll();
+            setActiveStep("where"); // Reset visual state too
           }}
           className="text-sm font-medium underline underline-offset-2 hover:text-neutral-600 transition"
         >
           Clear all
         </button>
-        <button className="bg-rose-600 hover:bg-rose-700 transition flex items-center gap-2 text-white px-6 py-3 rounded-lg font-medium shadow-md">
+        <button
+          onClick={form.onSubmit}
+          className="bg-rose-600 hover:bg-rose-700 transition flex items-center gap-2 text-white px-6 py-3 rounded-lg font-medium shadow-md"
+        >
           <Search size={18} />
           Search
         </button>

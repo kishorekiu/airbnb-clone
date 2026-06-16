@@ -6,16 +6,32 @@ export async function getListings(
   cursor: string | null = null,
   limit = 12,
   category: string,
+  locationValue?: string | null,
+  guestCount?: string | null,
+  startDate?: string | null,
+  endDate?: string | null,
 ) {
   if (!LISTING_SERVICE_URL) return { listings: [], nextCursor: null };
 
   try {
     // If a cursor exists, append it to the URL query string
-    const cursorParam = cursor ? `&cursor=${cursor}` : "";
-    const categoryParam = category ? `&category=${category}` : "";
-    const apiUrl = `${LISTING_SERVICE_URL}/api/v1/listings?limit=${limit}${cursorParam}${categoryParam}`;
+    const url = new URL(`${process.env.LISTING_SERVICE_URL}/api/v1/listings`);
+    console.log("locationValue:", locationValue);
 
-    const response = await fetch(apiUrl, { method: "GET" });
+    // 2. Use searchParams.append() to automatically handle all encoding!
+    url.searchParams.append("limit", limit.toString());
+
+    if (cursor) url.searchParams.append("cursor", cursor);
+    if (category) url.searchParams.append("category", category);
+    if (locationValue) url.searchParams.append("locationValue", locationValue);
+    if (guestCount) url.searchParams.append("guestCount", guestCount);
+    if (startDate) url.searchParams.append("startDate", startDate);
+    if (endDate) url.searchParams.append("endDate", endDate);
+
+    // X-Ray Log to verify it looks perfect:
+    console.log("🚀 NEXT.JS FETCHING URL:", url.toString());
+
+    const response = await fetch(url, { method: "GET" });
 
     if (!response.ok) throw new Error("Network response was not ok");
 

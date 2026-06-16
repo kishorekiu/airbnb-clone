@@ -8,6 +8,7 @@ interface CounterProps {
   value: number;
   onChange: (value: number) => void;
   maxValue?: number;
+  minValue?: number; // Added to prevent adults from going below 1
 }
 
 const CounterRow = ({
@@ -16,6 +17,7 @@ const CounterRow = ({
   value,
   onChange,
   maxValue = 16,
+  minValue = 0,
 }: CounterProps) => {
   return (
     <div className="flex flex-row items-center justify-between py-4 border-b border-neutral-200 last:border-none">
@@ -26,7 +28,7 @@ const CounterRow = ({
       <div className="flex flex-row items-center gap-4">
         <button
           onClick={() => onChange(value - 1)}
-          disabled={value === 0}
+          disabled={value <= minValue}
           className="w-8 h-8 rounded-full border border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-neutral-800 hover:text-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
         >
           <Minus size={14} strokeWidth={3} />
@@ -46,33 +48,54 @@ const CounterRow = ({
   );
 };
 
-export default function GuestCounter() {
-  // In Phase 2, we will lift this state up to the URL Search Params
+// NEW: Define the props expected from the Search component
+interface GuestCounterProps {
+  adults: number;
+  setAdults: (val: number) => void;
+  childrenCount: number;
+  setChildrenCount: (val: number) => void;
+  infants: number;
+  setInfants: (val: number) => void;
+  pets: number;
+  setPets: (val: number) => void;
+}
+
+export default function GuestCounter({
+  adults,
+  setAdults,
+  childrenCount,
+  setChildrenCount,
+  infants,
+  setInfants,
+  pets,
+  setPets,
+}: GuestCounterProps) {
   return (
     <div className="w-full">
       <CounterRow
         title="Adults"
         subtitle="Ages 13 or above"
-        value={0}
-        onChange={(val) => console.log("Adults:", val)}
+        value={adults}
+        onChange={setAdults}
+        minValue={1} // Airbnb always requires at least 1 adult!
       />
       <CounterRow
         title="Children"
         subtitle="Ages 2-12"
-        value={0}
-        onChange={(val) => console.log("Children:", val)}
+        value={childrenCount}
+        onChange={setChildrenCount}
       />
       <CounterRow
         title="Infants"
         subtitle="Under 2"
-        value={0}
-        onChange={(val) => console.log("Infants:", val)}
+        value={infants}
+        onChange={setInfants}
       />
       <CounterRow
         title="Pets"
         subtitle="Bringing a service animal?"
-        value={0}
-        onChange={(val) => console.log("Pets:", val)}
+        value={pets}
+        onChange={setPets}
         maxValue={5}
       />
     </div>
