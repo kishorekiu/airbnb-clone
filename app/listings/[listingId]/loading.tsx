@@ -1,6 +1,6 @@
 export default function LoadingListing() {
   return (
-    <div className="max-w-280 mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-28 pb-20">
+    <div className="max-w-280 mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-10 pb-20">
       {/* Back Button Skeleton */}
       <div className="flex flex-row items-center gap-2 mb-6 animate-pulse mt-2">
         {/* The Chevron Icon Ghost */}

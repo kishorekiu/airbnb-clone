@@ -16,7 +16,6 @@ export async function getListings(
   try {
     // If a cursor exists, append it to the URL query string
     const url = new URL(`${process.env.LISTING_SERVICE_URL}/api/v1/listings`);
-    console.log("locationValue:", locationValue);
 
     // 2. Use searchParams.append() to automatically handle all encoding!
     url.searchParams.append("limit", limit.toString());
@@ -27,9 +26,6 @@ export async function getListings(
     if (guestCount) url.searchParams.append("guestCount", guestCount);
     if (startDate) url.searchParams.append("startDate", startDate);
     if (endDate) url.searchParams.append("endDate", endDate);
-
-    // X-Ray Log to verify it looks perfect:
-    console.log("🚀 NEXT.JS FETCHING URL:", url.toString());
 
     const response = await fetch(url, { method: "GET" });
 

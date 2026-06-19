@@ -86,7 +86,7 @@ export default function InfiniteFeed({
 
   return (
     <>
-      <div className="pt-24 min-h-screen grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
+      <div className="pt-26 sm:pt-34 min-h-screen grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
         {allListings.map((listing: any) => (
           <ListingCard key={listing._id} data={listing} />
         ))}
